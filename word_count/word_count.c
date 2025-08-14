@@ -88,24 +88,43 @@ int readWordsDynamic(S_WORDS * words, FILE * input) {
         }
 
         words[word_count].word = w;
-        words[word_count].count = 0;
+        words[word_count].count = 1;
         word_count++;
     }
 
     return word_count;
 }
 
-int wordCount(S_WORDS * words, int len) {
-    int count_max = 0;
-    for(int i = 0; i < len; i++) {
+void uniqWordCount (S_WORDS * words, int len_arr) {
+    int i = 0;
+    while ( i < len_arr ) {
+        int j = i + 1;
         words[i].count = 1;
-        for (int j = i + 1; j < len; j++)
+        for( ; j < len_arr; j++) {
             if (! strcmp(words[i].word, words[j].word))
                 words[i].count++;
-        if ( count_max < words[i].count)
-            count_max = words[i].count;
+            else
+                break;
+        }
+        i = j;
     }
-    return count_max;
+}
+
+int compareByWord(const void * a, const void * b) {
+    S_WORDS const * w1 = (S_WORDS *)a;
+    S_WORDS const * w2 = (S_WORDS *)b;
+    return strcmp(w1->word, w2->word);
+}
+
+int compareByCountDesc(const void * a, const void * b) {
+    S_WORDS const * w1 = (S_WORDS *)a;
+    S_WORDS const * w2 = (S_WORDS *)b;
+    return w2->count > w1->count ? 1 : w2->count < w1->count ? -1 : 0;
+}
+
+void printWords(const S_WORDS *word, const int start, const int end, FILE *out) {
+    for (int i = start; i < end; i++)
+        fprintf(out, "%s = %d\n", word[i].word, word[i].count);
 }
 
 int main () {
@@ -130,13 +149,14 @@ int main () {
         return 1;
     int word_count = readWordsDynamic(words, input);
     if (word_count == -1) return 1;
-    
-    int count_max = wordCount(words,word_count);
-    for(int i = 0; i < word_count; i++) {
-        if (count_max == words[i].count)
-            fprintf(output,"%s = %d\n", words[i].word, words[i].count);
-    }
 
+    qsort(words, word_count, sizeof(S_WORDS), compareByWord);
+    uniqWordCount(words, word_count);
+    qsort(words, word_count, sizeof(S_WORDS), compareByCountDesc);
+    printWords(words,0,10,output);
+
+    fclose(input);
+    fclose(output);
     freeArr(words,word_count);
     return 0;
 }
