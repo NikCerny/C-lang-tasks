@@ -19,22 +19,24 @@ void debugPrint(S_WORDS * words, int len) {
     }
 }
 
-int copyWord(S_WORDS * words, const char * src) {
+int copyWord(S_WORDS * words, FILE * f_ptr) {
     int word_idx = 0, char_idx = 0;
-    while (*src) {
-        while( *src && isalnum(*src)) {
-            words[word_idx].word[char_idx] = tolower(*src);
+    char ch = fgetc(f_ptr);
+    while (ch != EOF ) {
+        while( ch && isalnum(ch)) {
+            words[word_idx].word[char_idx] = tolower(ch);
             char_idx++;
-            src++;
+            ch = fgetc(f_ptr);
         }
         words[word_idx].word[char_idx] = '\0';
         if (char_idx > 0)
             word_idx++;
         char_idx = 0;
-        if (*src == '\0')
+        if (ch == '\0')
             break;
-        src++;
+        ch = fgetc(f_ptr);
     }
+    
     return word_idx;
 }
 
@@ -62,13 +64,27 @@ S_WORDS * arrAllocInitial () {
 
 int main () {
 
-    const char * text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
- //   const char * text = "a b c";
+    FILE * input = NULL, *output = stdout;
+    const char * inputFile = "input.txt";
+    input = fopen(inputFile, "r");
+    if (input == NULL) {
+        perror("Input file cannot be opened");
+        return 1;
+    }
+
+    output = fopen("output.txt", "w");
+    if (output == NULL) {
+        perror("Output file cannot be opened");
+        fclose(input);
+        return 1;
+    }
+
+
     S_WORDS * words = arrAllocInitial();
     if (words == NULL )
         return 1;
 
-    int len = copyWord(words,text);
+    int len = copyWord(words,input);
    // debugPrint(words,len);
 
     int count_max = wordCount(words,len);
