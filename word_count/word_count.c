@@ -59,7 +59,7 @@ char * readWordDynamic (FILE * ptr) {
             word = temp;
         }
         word[word_len++] = tolower(ch);
-    } while ((ch = fgetc(ptr)) != EOF && !isspace(ch));
+    } while ((ch = fgetc(ptr)) != EOF && isalnum(ch));
 
     word[word_len] = '\0';
     return word;
