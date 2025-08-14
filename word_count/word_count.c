@@ -95,7 +95,7 @@ int readWordsDynamic(S_WORDS ** words, FILE * input) {
     return word_count;
 }
 
-// Compact duplicates and return new array length
+
 void uniqWordCount (S_WORDS * words, int len_arr) {
     int i = 0;
     while ( i < len_arr ) {
