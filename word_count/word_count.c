@@ -88,17 +88,19 @@ int readWordsDynamic(S_WORDS ** words, FILE * input) {
         }
 
         (*words)[word_count].word = w;
-        (*words)[word_count].count = 1;
+        (*words)[word_count].count = 0;
         word_count++;
     }
 
     return word_count;
 }
 
+// Compact duplicates and return new array length
 void uniqWordCount (S_WORDS * words, int len_arr) {
     int i = 0;
     while ( i < len_arr ) {
         int j = i + 1;
+        words[i].count = 1;
         for( ; j < len_arr; j++) {
             if (! strcmp(words[i].word, words[j].word))
                 words[i].count++;
@@ -108,6 +110,7 @@ void uniqWordCount (S_WORDS * words, int len_arr) {
         i = j;
     }
 }
+
 
 int compareByWord(const void * a, const void * b) {
     S_WORDS const * w1 = (S_WORDS *)a;
@@ -123,13 +126,19 @@ int compareByCountDesc(const void * a, const void * b) {
 
 void printWords(const S_WORDS *word, const int end, FILE *out) {
     for (int i = 0; i < end; i++)
-        fprintf(out, "%s = %d\n", word[i].word, word[i].count);
+        if (word[i].count != 0)
+            fprintf(out, "%s = %d\n", word[i].word, word[i].count);
 }
 
 int main (int argc, char **argv) {
 
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s input_name.txt [word_count_output]\n", argv[0]);
+        return 1;
+    }
+
     FILE * input = NULL, *output = stdout;
-    const char * inputFile = "";
+    const char * inputFile = argv[1];
     input = fopen(inputFile, "r");
     if (input == NULL) {
         perror("Input file cannot be opened");
@@ -144,8 +153,8 @@ int main (int argc, char **argv) {
     }
 
     int word_count_output = 10;
-    if (argc > 1)
-        word_count_output = atoi(argv[1]);
+    if (argc > 2)
+        word_count_output = atoi(argv[2]);
 
     S_WORDS * words = arrAllocInitial();
     if (words == NULL )
