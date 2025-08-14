@@ -1,9 +1,10 @@
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "stdio.h"
 
-#define MAX_WORDS 1000
+#define INIT_CAPACITY_WORDS 1000
 #define MAX_CHARS 1000
 
 typedef struct {
@@ -50,12 +51,23 @@ int wordCount(S_WORDS * words, int len) {
     return count_max;
 }
 
+S_WORDS * arrAllocInitial () {
+    S_WORDS *words = (S_WORDS *) malloc(INIT_CAPACITY_WORDS * sizeof(S_WORDS));
+    if (words == NULL) {
+        fprintf(stderr, "Initial memory allocation has failed\n");
+        return NULL;
+    }
+    return words;
+}
 
 int main () {
 
     const char * text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
  //   const char * text = "a b c";
-    S_WORDS words[MAX_WORDS];
+    S_WORDS * words = arrAllocInitial();
+    if (words == NULL )
+        return 1;
+
     int len = copyWord(words,text);
    // debugPrint(words,len);
 
@@ -64,5 +76,7 @@ int main () {
         if (count_max == words[i].count)
             printf("%s = %d\n", words[i].word, words[i].count);
     }
+
+    free(words);
     return 0;
 }
