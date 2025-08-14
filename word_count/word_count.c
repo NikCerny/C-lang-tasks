@@ -129,7 +129,7 @@ void printWords(const S_WORDS *word, const int end, FILE *out) {
 int main (int argc, char **argv) {
 
     FILE * input = NULL, *output = stdout;
-    const char * inputFile = "../../bible.txt";
+    const char * inputFile = "";
     input = fopen(inputFile, "r");
     if (input == NULL) {
         perror("Input file cannot be opened");
