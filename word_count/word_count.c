@@ -34,54 +34,36 @@ S_WORDS * arrAllocInitial () {
     return words;
 }
 
-int copyWord(S_WORDS * words, FILE * f_ptr) {
-    int words_capacity = INIT_CAPACITY_WORDS;
-    int word_len_capacity = INIT_CAPACITY_CHARS;
-    int word_idx = 0, char_idx = 0;
-    char ch = fgetc(f_ptr);
+char * readWordDynamic (FILE * ptr) {
+    int capacity = INIT_CAPACITY_CHARS;
+    int len = 0;
+    char *word = (char *) malloc(capacity);
+    if (!word) return NULL;
+    int ch;
 
-
-    words[word_idx].word = (char *) malloc(word_len_capacity);
-    while (ch != EOF ) {
-        if (word_idx >= words_capacity) {
-            words_capacity *= 2;
-            S_WORDS *temp = (S_WORDS *)realloc(words, words_capacity * sizeof(words));
-            if (temp == NULL) {
-                fprintf(stderr, "Memory reallocation for \"S_WORDS *temp\" has failed\n");
-                freeArr(words, word_idx);
-                return 1;
-            }
-            words = temp;
-        }
-
-        int word_len = 0;
-        while( ch && isalnum(ch)) {
-            if (word_len + 1 >= word_len_capacity) {
-                word_len_capacity *= 2;
-                char *temp = (char *) realloc(words[word_idx].word, word_len_capacity);
-                if (!temp) {
-                    free(words[word_idx].word);
-                    return NULL;
-                }
-                words[word_idx].word = temp;
-            }
-            words[word_idx].word[char_idx] = tolower(ch);
-            word_len++;
-            char_idx++;
-            ch = fgetc(f_ptr);
-        }
-        words[word_idx].word[char_idx] = '\0';
-        if (char_idx > 0) {
-            word_idx++;
-            words[word_idx].word = (char *) malloc(word_len_capacity);
-        }
-        char_idx = 0;
-        if (ch == '\0')
-            break;
-        ch = fgetc(f_ptr);
+    //skip white chars
+    while ((ch = fgetc(ptr)) != EOF && isspace(ch)) {}
+    if (ch == EOF) {
+        free(word);
+        return NULL;
     }
 
-    return word_idx;
+    // read chars while not EOF or space
+    do {
+        if (len + 1 >= capacity) {
+            capacity *= 2;
+            char *temp = (char *) realloc(word, capacity);
+            if (!temp) {
+                free(word);
+                return NULL;
+            }
+            word = temp;
+        }
+        word[len++] = tolower(ch);
+    } while ((ch = fgetc(ptr)) != EOF && !isspace(ch));
+
+    word[len] = '\0';
+    return word;
 }
 
 int wordCount(S_WORDS * words, int len) {
@@ -119,16 +101,38 @@ int main () {
     S_WORDS * words = arrAllocInitial();
     if (words == NULL )
         return 1;
+    char * w;
 
-    int len = copyWord(words,input);
-     debugPrint(words,len,output);
+    int words_capacity = INIT_CAPACITY_WORDS;
+    int word_count = 0;
+    while ((w = readWordDynamic(input)) != NULL) {
+        if (w[0] == '\0') {
+            free(w);
+            continue;
+        }
+        if (word_count >= words_capacity) {
+            words_capacity *= 2;
+            S_WORDS *temp = (S_WORDS *)realloc(words, words_capacity * sizeof(S_WORDS));
+            if (temp == NULL) {
+                fprintf(stderr, "Chyba realokace paměti\n");
+                freeArr(words, word_count);
+                fclose(input);
+                return 1;
+            }
+            words = temp;
+        }
 
-    // int count_max = wordCount(words,len);
-    // for(int i = 0; i < len; i++) {
-    //     if (count_max == words[i].count)
-    //         printf("%s = %d\n", words[i].word, words[i].count);
-    // }
+        words[word_count].word = w;
+        words[word_count].count = 0;
+        word_count++;
+    }
 
-    freeArr(words,len+1);
+    int count_max = wordCount(words,word_count);
+    for(int i = 0; i < word_count; i++) {
+        if (count_max == words[i].count)
+            printf("%s = %d\n", words[i].word, words[i].count);
+    }
+
+    freeArr(words,word_count);
     return 0;
 }
