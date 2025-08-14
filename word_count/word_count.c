@@ -10,7 +10,29 @@ typedef struct {
 } S_WORDS;
 
 
+int copyWord(S_WORDS * words, const char * src) {
+    int word_idx = 0, char_idx = 0;
+    while (*src) {
+        while( *src && isalnum(*src)) {
+            words[word_idx].word[char_idx] = *src;
+            char_idx++;
+            src++;
+        }
+        words[word_idx].word[char_idx] = '\0';
+        if (char_idx > 0)
+            word_idx++;
+        char_idx = 0;
+        src++;
+    }
+    return word_idx;
+}
 
+void debugPrint(S_WORDS * words, int len) {
+    printf("Total word count:%d\n", len);
+    for(int i = 0; i < len; i++) {
+        printf("%s\n", words[i].word);
+    }
+}
 
 
 int main () {
@@ -19,23 +41,8 @@ int main () {
     const char * ptr_text = text;
     S_WORDS words[MAX_WORDS];
 
-    int i = 0, j = 0;
-    while (*ptr_text) {
-        while( *ptr_text && ! isspace(*ptr_text)) {
-         words[i].word[j] = *ptr_text;
-            j++;
-            ptr_text++;
-        }
-        words[i].word[j] = '\0';
-        j = 0;
-        i++;
-        ptr_text++;
-    }
-
-
-    for(int n = 0; n < i; n++) {
-        printf("%s\n", words[n].word);
-    }
+    int len = copyWord(words,ptr_text);
+    debugPrint(words,len);
 
     return 0;
 }
