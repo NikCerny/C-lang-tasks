@@ -1,7 +1,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "stdio.h"
 
 #define INIT_CAPACITY_WORDS 1000
@@ -12,7 +11,7 @@ typedef struct {
     int count;
 } S_WORDS;
 
-void debugPrint(S_WORDS * words, int len, FILE *out) {
+void debugPrint(const S_WORDS * words, const int len, FILE *out) {
     printf("Total word count:%d\n", len);
     for(int i = 0; i < len; i++) {
         fprintf(out,"%s\n", words[i].word);
@@ -35,9 +34,9 @@ S_WORDS * arrAllocInitial () {
 }
 
 char * readWordDynamic (FILE * ptr) {
-    int capacity = INIT_CAPACITY_CHARS;
-    int len = 0;
-    char *word = (char *) malloc(capacity);
+    int word_len_capacity = INIT_CAPACITY_CHARS;
+    int word_len = 0;
+    char *word = (char *) malloc(word_len_capacity);
     if (!word) return NULL;
     int ch;
 
@@ -50,20 +49,50 @@ char * readWordDynamic (FILE * ptr) {
 
     // read chars while not EOF or space
     do {
-        if (len + 1 >= capacity) {
-            capacity *= 2;
-            char *temp = (char *) realloc(word, capacity);
+        if (word_len + 1 >= word_len_capacity) {
+            word_len_capacity *= 2;
+            char *temp = (char *) realloc(word, word_len_capacity);
             if (!temp) {
                 free(word);
                 return NULL;
             }
             word = temp;
         }
-        word[len++] = tolower(ch);
+        word[word_len++] = tolower(ch);
     } while ((ch = fgetc(ptr)) != EOF && !isspace(ch));
 
-    word[len] = '\0';
+    word[word_len] = '\0';
     return word;
+}
+
+int readWordsDynamic(S_WORDS * words, FILE * input) {
+
+    char * w;
+    int words_capacity = INIT_CAPACITY_WORDS;
+    int word_count = 0;
+    while ((w = readWordDynamic(input)) != NULL) {
+        if (w[0] == '\0') {
+            free(w);
+            continue;
+        }
+        if (word_count >= words_capacity) {
+            words_capacity *= 2;
+            S_WORDS *temp = (S_WORDS *)realloc(words, words_capacity * sizeof(S_WORDS));
+            if (temp == NULL) {
+                fprintf(stderr, "Memory reallocation for \"S_WORDS *temp\" has failed\n");
+                freeArr(words, word_count);
+                fclose(input);
+                return -1;
+            }
+            words = temp;
+        }
+
+        words[word_count].word = w;
+        words[word_count].count = 0;
+        word_count++;
+    }
+
+    return word_count;
 }
 
 int wordCount(S_WORDS * words, int len) {
@@ -78,7 +107,6 @@ int wordCount(S_WORDS * words, int len) {
     }
     return count_max;
 }
-
 
 int main () {
 
@@ -97,40 +125,16 @@ int main () {
         return 1;
     }
 
-
     S_WORDS * words = arrAllocInitial();
     if (words == NULL )
         return 1;
-    char * w;
-
-    int words_capacity = INIT_CAPACITY_WORDS;
-    int word_count = 0;
-    while ((w = readWordDynamic(input)) != NULL) {
-        if (w[0] == '\0') {
-            free(w);
-            continue;
-        }
-        if (word_count >= words_capacity) {
-            words_capacity *= 2;
-            S_WORDS *temp = (S_WORDS *)realloc(words, words_capacity * sizeof(S_WORDS));
-            if (temp == NULL) {
-                fprintf(stderr, "Chyba realokace paměti\n");
-                freeArr(words, word_count);
-                fclose(input);
-                return 1;
-            }
-            words = temp;
-        }
-
-        words[word_count].word = w;
-        words[word_count].count = 0;
-        word_count++;
-    }
-
+    int word_count = readWordsDynamic(words, input);
+    if (word_count == -1) return 1;
+    
     int count_max = wordCount(words,word_count);
     for(int i = 0; i < word_count; i++) {
         if (count_max == words[i].count)
-            printf("%s = %d\n", words[i].word, words[i].count);
+            fprintf(output,"%s = %d\n", words[i].word, words[i].count);
     }
 
     freeArr(words,word_count);
