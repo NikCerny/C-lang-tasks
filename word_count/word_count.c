@@ -65,7 +65,7 @@ char * readWordDynamic (FILE * ptr) {
     return word;
 }
 
-int readWordsDynamic(S_WORDS * words, FILE * input) {
+int readWordsDynamic(S_WORDS ** words, FILE * input) {
 
     char * w;
     int words_capacity = INIT_CAPACITY_WORDS;
@@ -77,18 +77,18 @@ int readWordsDynamic(S_WORDS * words, FILE * input) {
         }
         if (word_count >= words_capacity) {
             words_capacity *= 2;
-            S_WORDS *temp = (S_WORDS *)realloc(words, words_capacity * sizeof(S_WORDS));
+            S_WORDS *temp = (S_WORDS *)realloc(*words, words_capacity * sizeof(S_WORDS));
             if (temp == NULL) {
                 fprintf(stderr, "Memory reallocation for \"S_WORDS *temp\" has failed\n");
-                freeArr(words, word_count);
+                freeArr(*words, word_count);
                 fclose(input);
                 return -1;
             }
-            words = temp;
+            *words = temp;
         }
 
-        words[word_count].word = w;
-        words[word_count].count = 1;
+        (*words)[word_count].word = w;
+        (*words)[word_count].count = 1;
         word_count++;
     }
 
@@ -99,7 +99,6 @@ void uniqWordCount (S_WORDS * words, int len_arr) {
     int i = 0;
     while ( i < len_arr ) {
         int j = i + 1;
-        words[i].count = 1;
         for( ; j < len_arr; j++) {
             if (! strcmp(words[i].word, words[j].word))
                 words[i].count++;
@@ -122,15 +121,15 @@ int compareByCountDesc(const void * a, const void * b) {
     return w2->count > w1->count ? 1 : w2->count < w1->count ? -1 : 0;
 }
 
-void printWords(const S_WORDS *word, const int start, const int end, FILE *out) {
-    for (int i = start; i < end; i++)
+void printWords(const S_WORDS *word, const int end, FILE *out) {
+    for (int i = 0; i < end; i++)
         fprintf(out, "%s = %d\n", word[i].word, word[i].count);
 }
 
-int main () {
+int main (int argc, char **argv) {
 
     FILE * input = NULL, *output = stdout;
-    const char * inputFile = "input.txt";
+    const char * inputFile = "../../bible.txt";
     input = fopen(inputFile, "r");
     if (input == NULL) {
         perror("Input file cannot be opened");
@@ -144,16 +143,23 @@ int main () {
         return 1;
     }
 
+    int word_count_output = 10;
+    if (argc > 1)
+        word_count_output = atoi(argv[1]);
+
     S_WORDS * words = arrAllocInitial();
     if (words == NULL )
         return 1;
-    int word_count = readWordsDynamic(words, input);
+    int word_count = readWordsDynamic(&words, input);
     if (word_count == -1) return 1;
 
     qsort(words, word_count, sizeof(S_WORDS), compareByWord);
     uniqWordCount(words, word_count);
     qsort(words, word_count, sizeof(S_WORDS), compareByCountDesc);
-    printWords(words,0,10,output);
+
+    if (word_count_output > word_count)
+        word_count_output = word_count;
+    printWords(words, word_count_output,output);
 
     fclose(input);
     fclose(output);
