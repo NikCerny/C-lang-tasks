@@ -61,7 +61,7 @@ char * readStringDynamic (FILE * ptr) {
             string[string_len++] = ch; // keep the punctuation
             break;
         }
-        string[string_len++] = tolower(ch);
+        string[string_len++] = ch;
     } while ((ch = fgetc(ptr)) != EOF);
 
     string[string_len] = '\0';
