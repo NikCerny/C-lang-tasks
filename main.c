@@ -10,10 +10,10 @@ typedef struct {
     char * string;
 } S_STRINGS;
 
-void debugPrint(const S_STRINGS * words, const int len, FILE *out) {
-    printf("Total word count:%d\n", len);
+void debugPrint(const S_STRINGS * strings, const int len, FILE *out) {
+    printf("Total string count:%d\n", len);
     for(int i = 0; i < len; i++) {
-        fprintf(out,"%s\n", words[i].string);
+        fprintf(out,"%s\n", strings[i].string);
     }
 }
 
@@ -64,7 +64,7 @@ char * readStringDynamic (FILE * ptr) {
     return string;
 }
 
-int readTextDynamic(S_STRINGS ** words, FILE * input) {
+int readTextDynamic(S_STRINGS ** strings, FILE * input) {
 
     char * w;
     int text_capacity = INIT_CAPACITY_STRINGS;
@@ -76,17 +76,17 @@ int readTextDynamic(S_STRINGS ** words, FILE * input) {
         }
         if (string_count >= text_capacity) {
             text_capacity *= 2;
-            S_STRINGS *temp = (S_STRINGS *)realloc(*words, text_capacity * sizeof(S_STRINGS));
+            S_STRINGS *temp = (S_STRINGS *)realloc(*strings, text_capacity * sizeof(S_STRINGS));
             if (temp == NULL) {
                 fprintf(stderr, "Memory reallocation for \"S_WORDS *temp\" has failed\n");
-                freeArr(*words, string_count);
+                freeArr(*strings, string_count);
                 fclose(input);
                 return -1;
             }
-            *words = temp;
+            *strings = temp;
         }
 
-        (*words)[string_count].string = w;
+        (*strings)[string_count].string = w;
         string_count++;
     }
 
@@ -110,7 +110,7 @@ int readTextDynamic(S_STRINGS ** words, FILE * input) {
 // }
 
 
-int compareByWord(const void * a, const void * b) {
+int compareByString(const void * a, const void * b) {
     S_STRINGS const * w1 = (S_STRINGS *)a;
     S_STRINGS const * w2 = (S_STRINGS *)b;
     return strcmp(w1->string, w2->string);
@@ -159,7 +159,7 @@ int main (int argc, char **argv) {
     int string_count = readTextDynamic(&strings, input);
     if (string_count == -1) return 1;
 
-    qsort(strings, string_count, sizeof(S_STRINGS), compareByWord);
+    qsort(strings, string_count, sizeof(S_STRINGS), compareByString);
    // uniqWordCount(strings, word_count);
    // qsort(strings, word_count, sizeof(S_STRINGS), compareByCountDesc);
 
