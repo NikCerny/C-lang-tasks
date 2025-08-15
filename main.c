@@ -78,7 +78,7 @@ int readTextDynamic(S_STRINGS ** strings, FILE * input) {
             text_capacity *= 2;
             S_STRINGS *temp = (S_STRINGS *)realloc(*strings, text_capacity * sizeof(S_STRINGS));
             if (temp == NULL) {
-                fprintf(stderr, "Memory reallocation for \"S_WORDS *temp\" has failed\n");
+                fprintf(stderr, "Memory reallocation for \"S_STRINGS *temp\" has failed\n");
                 freeArr(*strings, string_count);
                 fclose(input);
                 return -1;
@@ -122,7 +122,7 @@ int compareByString(const void * a, const void * b) {
 //     return w2->count > w1->count ? 1 : w2->count < w1->count ? -1 : 0;
 // }
 
-void printWords(const S_STRINGS *strings, const int end, FILE *out) {
+void printStrings(const S_STRINGS *strings, const int end, FILE *out) {
     for (int i = 0; i < end; i++)
         fprintf(out, "%d: %s\n",i, strings[i].string);
 }
@@ -130,7 +130,7 @@ void printWords(const S_STRINGS *strings, const int end, FILE *out) {
 int main (int argc, char **argv) {
 
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s input_name.txt [word_count_output]\n", argv[0]);
+        fprintf(stderr, "Usage: %s input_name.txt [string_count_output]\n", argv[0]);
         return 1;
     }
 
@@ -149,10 +149,6 @@ int main (int argc, char **argv) {
         return 1;
     }
 
-    int word_count_output = 10;
-    if (argc > 2)
-        word_count_output = atoi(argv[2]);
-
     S_STRINGS * strings = arrAllocInitial();
     if (strings == NULL )
         return 1;
@@ -163,9 +159,14 @@ int main (int argc, char **argv) {
    // uniqWordCount(strings, word_count);
    // qsort(strings, word_count, sizeof(S_STRINGS), compareByCountDesc);
 
-    if (word_count_output > string_count)
-        word_count_output = string_count;
-    printWords(strings, word_count_output,output);
+    int string_count_output;
+    if (argc > 2)
+        string_count_output = atoi(argv[2]); // user input
+    else
+        string_count_output = string_count; // list every sentence by default
+    if (string_count_output > string_count) // check user input
+        string_count_output = string_count;
+    printStrings(strings, string_count_output,output);
 
     fclose(input);
     fclose(output);
