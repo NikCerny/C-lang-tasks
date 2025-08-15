@@ -1,1 +1,2 @@
-apple orange apple banana apple orange
+This is a test. Another sentence? And a third one!
+Zebra comes last. Apple comes first.

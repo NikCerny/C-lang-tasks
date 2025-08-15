@@ -1,3 +1,5 @@
-apple = 3
-orange = 2
-banana = 1
+and a third one!
+another sentence?
+apple comes first.
+this is a test.
+zebra comes last.

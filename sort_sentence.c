@@ -13,7 +13,7 @@ typedef struct {
 void debugPrint(const S_STRINGS * strings, const int len, FILE *out) {
     printf("Total string count:%d\n", len);
     for(int i = 0; i < len; i++) {
-        fprintf(out,"%s\n", strings[i].string);
+        fprintf(out,"%d: %s\n", i, strings[i].string);
     }
 }
 
@@ -57,8 +57,12 @@ char * readStringDynamic (FILE * ptr) {
             }
             string = temp;
         }
+        if (ch == '.' || ch == '?' || ch == '!') {
+            string[string_len++] = ch; // keep the punctuation
+            break;
+        }
         string[string_len++] = tolower(ch);
-    } while ((ch = fgetc(ptr)) != EOF && ch != '.' && ch != '?' && ch != '!');
+    } while ((ch = fgetc(ptr)) != EOF);
 
     string[string_len] = '\0';
     return string;
@@ -124,7 +128,7 @@ int compareByString(const void * a, const void * b) {
 
 void printStrings(const S_STRINGS *strings, const int end, FILE *out) {
     for (int i = 0; i < end; i++)
-        fprintf(out, "%d: %s\n",i, strings[i].string);
+        fprintf(out, "%s\n", strings[i].string);
 }
 
 int main (int argc, char **argv) {
