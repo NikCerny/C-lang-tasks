@@ -39,16 +39,16 @@ char * readStringDynamic (FILE * ptr) {
     if (!string) return NULL;
     char ch;
 
-    //skip white chars
-    while ((ch = fgetc(ptr)) != EOF && isspace(ch)) {}
+    //skip white chars or not alphanumeric chars
+    while ((ch = fgetc(ptr)) != EOF && (isspace(ch) || !isalnum(ch))) {}
     if (ch == EOF) {
         free(string);
         return NULL;
     }
 
-    // read chars while not EOF or space
+    // read chars until sentence terminator
     do {
-        if (string_len + 1 >= string_len_capacity) {
+        if (string_len + 2 >= string_len_capacity) { // // +2 for punctuation + '\0'
             string_len_capacity *= 2;
             char *temp = (char *) realloc(string, string_len_capacity);
             if (!temp) {
@@ -63,6 +63,7 @@ char * readStringDynamic (FILE * ptr) {
         }
         string[string_len++] = ch;
     } while ((ch = fgetc(ptr)) != EOF);
+
 
     string[string_len] = '\0';
     return string;
@@ -117,7 +118,7 @@ int readTextDynamic(S_STRINGS ** strings, FILE * input) {
 int compareByString(const void * a, const void * b) {
     S_STRINGS const * w1 = (S_STRINGS *)a;
     S_STRINGS const * w2 = (S_STRINGS *)b;
-    return strcmp(w1->string, w2->string);
+    return strcasecmp(w1->string, w2->string); // case-insensitive sorting. example: Zebra - apple -> apple - Zebra
 }
 
 // int compareByCountDesc(const void * a, const void * b) {
@@ -171,7 +172,7 @@ int main (int argc, char **argv) {
     if (string_count_output > string_count) // check user input
         string_count_output = string_count;
     printStrings(strings, string_count_output,output);
-
+  //  debugPrint(strings, string_count_output,output);
     fclose(input);
     fclose(output);
     freeArr(strings,string_count);
