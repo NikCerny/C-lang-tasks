@@ -1,5 +1,5 @@
-and a third one!
-another sentence?
-apple comes first.
-this is a test.
-zebra comes last.
+And a third one!
+Another sentence?
+Apple comes first.
+This is a test.
+Zebra comes last.

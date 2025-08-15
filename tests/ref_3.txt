@@ -1,2 +1,4 @@
-test = 4
-123 = 2
+123 test, test!
+123?
+TEST
+test.
