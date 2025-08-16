@@ -1,3 +1,0 @@
-apple = 3
-orange = 2
-banana = 1
