@@ -6,3 +6,14 @@ The user provides all of his inputs exclusively as program parameters at run tim
 
 Test the created programs on large data sets, for example, for text tasks you can use the English text of the Bible (size approx. 4 MB)
 
+## Solution
+
+### Usage CLI:
+
+args: program_name input_name.txt [word_count_output]
+
+example:
+
+`./a.out tests/in_2.txt 5` -> first five sorted strings
+
+`./a.out tests/in_2.txt` -> all sorted strings(default)
