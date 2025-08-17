@@ -4,7 +4,7 @@
 #define INIT_CAPACITY_INT 10
 
 int * initialAlloc() {
-    int * res = (int *) calloc (INIT_CAPACITY_INT, sizeof(res));
+    int * res = (int *) malloc (INIT_CAPACITY_INT * sizeof(res));
     if (res == NULL) {
         fprintf(stderr, "Initial memory for \"int * res\" allocation has failed\n");
         return NULL;
