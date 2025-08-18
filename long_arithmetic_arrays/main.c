@@ -6,9 +6,9 @@
 
 typedef struct {
     int * number;
-    int len;
-    int sign;
-    int point_pos; // number of digits on the decimal line
+    int len; // number of digits stored
+    int sign; // +1 - positive, -1 - negative
+    int point_pos; // number of digits after decimal point
 } S_NUMBER;
 
 void freeStruct(S_NUMBER * n) {
@@ -48,13 +48,13 @@ void trimZeros(S_NUMBER *n) {
     if (is_zero) {
         n->len = 1;
         n->point_pos = 0;
-        n->sign = 0;
+        n->sign = +1;
         n->number[0] = 0;
     }
 }
 
 void printDebug(const S_NUMBER * n) {
-    if (n->sign == 1)
+    if (n->sign == -1)
         printf("-");
     for (int i = 0; i < n->len; i++) {
         if (i == n->len - n->point_pos)
@@ -69,7 +69,7 @@ void printDebug(const S_NUMBER * n) {
 
 void printNumberToFile(const S_NUMBER * n, FILE *out) {
     if (n == NULL) return;
-    if (n->sign == 1)
+    if (n->sign == -1)
         fprintf(out, "-");
     for (int i = 0; i < n->len; i++) {
         if (i == n->len - n->point_pos)
@@ -83,7 +83,7 @@ int getMax(int a, int b) {
     return a > b ? a : b;
 }
 
-void addArr(const S_NUMBER *a, const S_NUMBER *b, const S_NUMBER *res) {
+void addArr(const S_NUMBER *a, const S_NUMBER *b, S_NUMBER *res) {
     int carry = 0;
     int i = a->len - 1;
     int j = b->len - 1;
@@ -106,7 +106,7 @@ void addArr(const S_NUMBER *a, const S_NUMBER *b, const S_NUMBER *res) {
     res->number[k] = carry;
 }
 
-void substractArr(const S_NUMBER *a, const S_NUMBER *b, const S_NUMBER *res) {
+void substractArr(const S_NUMBER *a, const S_NUMBER *b, S_NUMBER *res) {
     int borrow = 0;
     int i = a->len - 1;
     int j = b->len - 1;
@@ -138,7 +138,7 @@ S_NUMBER * arrAlloc(const int len) {
         return NULL;
     }
     newArr->len = len;
-    newArr->sign = 0;
+    newArr->sign = +1;
     newArr->point_pos = 0;
     return newArr;
 }
@@ -208,7 +208,7 @@ S_NUMBER * addArrStart(const S_NUMBER * a,const S_NUMBER * b) {
         addArr(a, b, res);
     } else {
         if (c == 0) {
-            res->sign = 0;
+            res->sign = +1;
             // result is zero
         } else if (c > 0) {
             res->sign = a->sign;
@@ -249,8 +249,7 @@ S_NUMBER * multiplyArrStart( const S_NUMBER *a,  const S_NUMBER *b) {
     if (res == NULL)
         return NULL;
     multiplyArr(a,b,res);
-    if (a->sign ^ b->sign) // XOR
-        res->sign = 1;
+    res->sign = (a->sign == b->sign) ? +1 : -1;
     res->point_pos = a->point_pos + b->point_pos;
     return res;
 }
@@ -278,15 +277,15 @@ S_NUMBER * getNumber(FILE * ptr) {
             freeStruct(n);
             return NULL;
         case '-':
-            n->sign = 1;
+            n->sign = -1;
             ch = fgetc(ptr);
             break;
         case '+':
-            n->sign = 0;
+            n->sign = +1;
             ch = fgetc(ptr);
             break;
         default:
-            n->sign = 0;
+            n->sign = +1;
     }
 
     do {
@@ -357,6 +356,8 @@ int main(int argc, char ** argv) {
     S_NUMBER * res = NULL, * next_number = NULL;
     res = getNumber(input);
     if (res == NULL) {
+        fclose(input);
+        fclose(output);
         fprintf(stderr, "Error: no number on input file\n");
         return 1;
     }
