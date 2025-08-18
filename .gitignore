@@ -1,5 +1,6 @@
 *.out
 *.txt
 !*/tests/*.txt
+!*/tests/*/*.txt
 *cmake-build-debug/
 *.idea

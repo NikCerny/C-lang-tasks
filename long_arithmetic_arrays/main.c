@@ -18,25 +18,25 @@ void freeStruct(S_NUMBER * n) {
 }
 
 void trimZeros(S_NUMBER *n) {
-    // 1. Odstranit úvodní nuly (před desetinnou čárkou)
+    // 1. Remove leading zeros (before the decimal point)
     int start = 0;
     while (start < n->len - 1 - n->point_pos && n->number[start] == 0)
         start++;
 
-    // Posunout číslice doleva
+    // Shift digits to the left
     if (start > 0) {
         for (int i = start; i < n->len; ++i)
             n->number[i - start] = n->number[i];
         n->len -= start;
     }
 
-    // 2. Odstranit koncové nuly v desetinné části
+    // 2. Remove trailing zeros in the decimal part
     while (n->point_pos > 0 && n->len > 1 && n->number[n->len - 1] == 0) {
         n->len--;
         n->point_pos--;
     }
 
-    // Pokud číslo zůstane úplně nulové, resetuj na 0
+    // If the number remains completely zero, reset to 0
     int is_zero = 1;
     for (int i = 0; i < n->len; i++) {
         if (n->number[i] != 0) {
@@ -219,14 +219,14 @@ S_NUMBER * addArrStart(const S_NUMBER * a,const S_NUMBER * b) {
         }
     }
 
-
     freeStruct(tmpA);
     freeStruct(tmpB);
 
     return res;
 }
 
-void multiplyArr(const S_NUMBER *a, const S_NUMBER *b, const S_NUMBER *res) {
+void multiplyArr(const S_NUMBER * a, const S_NUMBER * b, const S_NUMBER * res) {
+
     for (int i = 0; i < res->len; i++)
         res->number[i] = 0;
 
@@ -259,9 +259,13 @@ S_NUMBER * getNumber(FILE * ptr) {
     int capacity = 10;
     int ch;
     S_NUMBER * n = (S_NUMBER *) malloc(1 * sizeof(S_NUMBER));
-    if (n == NULL) return NULL;
+    if (n == NULL) {
+        fprintf(stderr, "Memory allocation has failed\n");
+        return NULL;
+    }
     n->number = (int *) calloc(capacity,sizeof(int));
     if (n->number == NULL) {
+        fprintf(stderr, "Memory allocation has failed\n");
         free(n);
         return NULL;
     }
@@ -285,18 +289,14 @@ S_NUMBER * getNumber(FILE * ptr) {
             n->sign = 0;
     }
 
-    if (ch == EOF || isspace(ch)) {
-        n->number[0] = 0;
-        n->len = 1;
-        return n;
-    }
-
     do {
         if (!isdigit(ch)) {
             if (ch == '.' && n->point_pos == 0) {
                 n->point_pos = n->len;
                 continue;
             }
+            if (ch != EOF)
+                fprintf(stderr, "Error: this character is not a valid digit in file: %c\n", ch);
             freeStruct(n);
             return NULL;
         }
@@ -304,6 +304,7 @@ S_NUMBER * getNumber(FILE * ptr) {
             capacity *= 2;
             int * tmp = (int *) realloc(n->number, capacity*sizeof(int));
             if (tmp == NULL) {
+                fprintf(stderr, "Memory allocation has failed\n");
                 freeStruct(n);
                 return NULL;
             }
@@ -338,14 +339,16 @@ int main(int argc, char ** argv) {
         return 1;
     }
 
-    S_NUMBER *(*operation)( const S_NUMBER *, const S_NUMBER *) = NULL;
+    S_NUMBER * (*operation) (const S_NUMBER *, const S_NUMBER *) = NULL;
 
-    if (strcmp(argv[2], "sum") == 0) {
+    if (! strcmp(argv[2], "sum")) {
         operation = addArrStart;
-    } else if (strcmp(argv[2], "prod") == 0) {
+    }
+    else if (! strcmp(argv[2], "prod")) {
         operation = multiplyArrStart;
-    } else {
-        fprintf(stderr, "Invalid operation: %s. Use 'sum' or 'prod'.\n", argv[2]);
+    }
+    else {
+        fprintf(stderr, "Invalid operation: %s. Use 'sum' or 'prod'\n", argv[2]);
         fclose(input);
         fclose(output);
         return 1;
@@ -353,9 +356,13 @@ int main(int argc, char ** argv) {
 
     S_NUMBER * res = NULL, * next_number = NULL;
     res = getNumber(input);
-    if (res == NULL)
+    if (res == NULL) {
+        fprintf(stderr, "Error: no number on input file\n");
         return 1;
+    }
+
     while (1) {
+
         next_number = getNumber(input);
         if (next_number == NULL)
             break;
@@ -369,8 +376,8 @@ int main(int argc, char ** argv) {
             fclose(output);
             return 1;
         }
-        freeStruct(res); // free the previous result
-        res = new_res;   // take ownership of the new result
+        freeStruct(res);
+        res = new_res;
         trimZeros(res);
         freeStruct(next_number);
         next_number = NULL;
