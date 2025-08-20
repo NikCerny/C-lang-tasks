@@ -1,3 +1,18 @@
+
+/*
+
+Tento zdrojovy kod jsem vypracoval zcela samostatne bez cizi pomoci
+Nekopiroval jsem ani neopsal jsem cizi zdrojove kody
+Nikdo me pri vypracovavani neradil
+Pokud nektery radek porusuje toto pravidlo je oznacen komentarem
+NENI MOJE TVORBA
+Poruseni techto pravidel se povazuje za podvod, ktery lze potrestat VYLOUCENIM ZE STUDIA
+
+
+NIKITA CHERNYKH 40472
+
+*/
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>

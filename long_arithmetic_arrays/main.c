@@ -180,15 +180,15 @@ S_NUMBER * addArrStart(const S_NUMBER * a,const S_NUMBER * b) {
     // Align decimal places
     if (a->point_pos < b->point_pos) {
         tmpA = copyAndNormalizeRealNum(a, a->len + b->point_pos - a->point_pos);
-        if (tmpA == NULL) return NULL;
+        if (tmpA == NULL)
+            return NULL;
         a = tmpA;
         tmpA->point_pos = b->point_pos;
-    } else if (a->point_pos > b->point_pos) {
+    }
+    else if (a->point_pos > b->point_pos) {
         tmpB = copyAndNormalizeRealNum(b, b->len + a->point_pos - b->point_pos);
-        if (tmpB == NULL) {
-            freeStruct(tmpA);
+        if (tmpB == NULL)
             return NULL;
-        }
         b = tmpB;
         tmpB->point_pos = a->point_pos;
     }
@@ -206,14 +206,15 @@ S_NUMBER * addArrStart(const S_NUMBER * a,const S_NUMBER * b) {
     if (a->sign == b->sign) {
         res->sign = a->sign;
         addArr(a, b, res);
-    } else {
-        if (c == 0) {
+    }
+    else {
+        if (c == 0)
             res->sign = +1;
-            // result is zero
-        } else if (c > 0) {
+        else if (c > 0) {
             res->sign = a->sign;
             substractArr(a, b, res);
-        } else {
+        }
+        else {
             res->sign = b->sign;
             substractArr(b, a, res);
         }
@@ -311,7 +312,6 @@ S_NUMBER * getNumber(FILE * ptr) {
         }
         n->number[n->len++] = ch - '0';
     } while ((ch = fgetc(ptr)) != EOF && !isspace(ch));
-
 
     if (n->point_pos != 0)
         n->point_pos = n->len - n->point_pos;
