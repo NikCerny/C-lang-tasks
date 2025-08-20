@@ -18,6 +18,7 @@ args: program_name input_name.txt {sum,prod}
 example:
 
 ./a.out input.txt sum -> sum of numbers
+
 ./a.out input.txt prod -> product of numbers 
 
 
